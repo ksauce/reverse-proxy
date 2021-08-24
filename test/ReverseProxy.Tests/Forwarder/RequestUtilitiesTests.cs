@@ -93,6 +93,12 @@ namespace Yarp.ReverseProxy.Forwarder.Tests
         [InlineData("http://localhost/base", "/path", "?query", "http://localhost/base/path?query")]
         [InlineData("http://localhost/base/", "/path", "?query", "http://localhost/base/path?query")]
         [InlineData("http://localhost/base/", "/path/", "?query", "http://localhost/base/path/?query")]
+        [InlineData("http://localhost/base/", "/path/你好", "?query%E4%BD%A0%E5%A5%BD", "http://localhost/base/path/%E4%BD%A0%E5%A5%BD?query%E4%BD%A0%E5%A5%BD")]
+        // pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+        [InlineData("http://localhost/base/", "/path/!$&'()*+,;=:@/%?#[]", "?query", "http://localhost/base/path/!$&'()*+,;=:@/%25%3F%23%5B%5D?query")]
+        // [InlineData("http://localhost/base/", "/path/", "?query%4A", "http://localhost/base/path/?query%4A")] // https://github.com/dotnet/runtime/issues/58057
+        // PathString should be fully un-escaped to start with and QueryString should be fully escaped.
+        [InlineData("http://localhost/base/", "/path/%2F%20", "?query%20", "http://localhost/base/path/%252F%2520?query%20")]
         public void MakeDestinationAddress(string destinationPrefix, string path, string query, string expected)
         {
             var uri = RequestUtilities.MakeDestinationAddress(destinationPrefix, new PathString(path), new QueryString(query));
